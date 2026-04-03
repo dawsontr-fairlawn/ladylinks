@@ -103,7 +103,11 @@
     <p>Your application has been submitted. You'll hear from us once your membership dues are processed.</p>
   </div>
 
-  <form id="memberForm">
+  <form id="memberForm" name="membership" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+    <input type="hidden" name="form-name" value="membership">
+    <p class="hidden" style="display:none;">
+      <label>Don't fill this out if you're human: <input name="bot-field"></label>
+    </p>
     <div class="section">
       <div class="section-title"><span>1</span>Applicant Information</div>
       <div class="field-row full">
@@ -211,29 +215,16 @@
 
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
-    const sources = [...document.querySelectorAll('input[name="source"]:checked')].map(c => c.value);
-    const data = {
-      fullName: form.fullName.value,
-      address: form.address.value,
-      phone: form.phone.value,
-      email: form.email.value,
-      date: form.appDate.value,
-      emergencyName: form.ecName.value,
-      emergencyPhone: form.ecPhone.value,
-      heardVia: sources.join(', ') || 'Not specified',
-      referredBy: form.referredBy.value || 'N/A',
-      waiverAccepted: 'Yes'
-    };
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Submitting…';
 
     try {
-      // ⬇️ REPLACE "YOUR_FORM_ID" with your Formspree ID (see setup instructions)
-      const res = await fetch('https://formspree.io/f/YOUR_FORM_ID', {
+      const formData = new FormData(form);
+      const res = await fetch('/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(data)
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData).toString()
       });
 
       if (res.ok) {
